@@ -1,0 +1,35 @@
+---
+####################################
+# Play01 - DB 기동
+# 1) 패키지 설치
+# 2) 서비스 기동
+####################################
+- name: 0) DB 서비스 기동 - loop 테스트
+  # hosts: database_dev
+  hosts: database_prod
+  gather_facts: true # 이거 한 번 쓰면 캐싱돼서 빠르긴 한데 처음 부를때 시간 먹는다
+  vars:
+    db_pkgs:
+      - mariadb
+      - mariadb-server
+      - python3-PyMySQL
+    db_svc: mariadb
+      
+  tasks: 
+    - name: 1) 패키지 설치 - mariadb, mariadb-server, python3-PyMySQL
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ db_pkgs }}"
+        # - mariadb
+        # - mariadb_server
+        # - python3-PyMySQL
+      # when: ansible_facts["distribution"] == "CentOS"
+      when: ansible_facts["distribution"] == "CentOS"
+
+    - name: 2) 서비스 기동 - mariadb,
+      ansible.builtin.systemd_service:
+        # name: mariadb
+        name: "{{ db_svc }}"
+        state: started
+        enabled: true

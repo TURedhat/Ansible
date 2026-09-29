@@ -1,0 +1,9 @@
+---
+network_connections:
+  - name: ens224					# 확인 필수: ssh ansible1 → nmcli dev
+    type: ethernet
+    ip:
+      address:
+        - 192.168.10.21/24
+    state: up
+

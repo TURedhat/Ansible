@@ -1,0 +1,27 @@
+---
+####################################
+# Play01 - DB 기동
+# 1) 패키지 설치
+# 2) 서비스 기동
+####################################
+- name: DB 기동 종료
+  hosts: all
+  gather_facts: true
+  vars:
+    db_pkgs:
+      - mariadb_server
+      - python3-PyMySQL
+    db_svc: mariadb
+  tasks: 
+    - name: 1) 서비스 기동 종료
+      ansible.builtin.systemd_service:
+        state: stopped
+        enabled: false
+        name: "{{ db_svc }}"
+
+    - name: 2) 패키지 삭제
+      ansible.builtin.dnf:
+        name: "{{ item }}"
+        state: absent
+      loop: "{{ db_pkgs }}"
+      when: ansible_facts["distribution"] == "CentOS"

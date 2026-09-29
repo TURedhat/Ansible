@@ -1,0 +1,35 @@
+---
+- name: Task Failure Exercise
+  hosts: databases
+  gather_facts: false
+  vars:
+    web_package: httpd     # 잘못된 정보 그대로 입력
+    db_package: mariadb-server
+    db_service: mariadb
+  tasks:
+    - name: Check local time
+      ansible.builtin.command: date
+      register: command_result
+      changed_when: false
+
+    - name: Print local time
+      ansible.builtin.debug:
+        var: command_result.stdout
+
+    - name: Attempt to set up web server
+      block:
+        - name: install {{ web_package }} package       
+          ansible.builtin.dnf:
+            name: "{{ web_package }}"           # 이러면 여기서 오류가 생기겠죠
+            state: present
+          failed_when: web_package == "httpd"
+      rescue:                                   # block 절을 실행하지 않았으니까 rescue 절을 실행
+        - name: Install {{ db_package }} package
+          ansible.builtin.dnf:
+            name: "{{ db_package }}"
+            state: present
+      always:                                   # 얘는 always니까 당연히 실행
+        - name : Start {{ db_service }} service
+          ansible.builtin.systemd.service:
+            name: "{{ db_service }}"
+            state: started
